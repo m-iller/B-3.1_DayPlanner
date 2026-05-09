@@ -6,12 +6,21 @@ namespace DayPlannerApp.Tests;
 
 public class TaskManagerTests
 {
+    private class TestLogger : ILogger
+    {
+        public void Debug(string message) { }
+        public void Info(string message) { }
+        public void Warning(string message) { }
+        public void Error(string message, Exception? exception = null) { }
+        public void Fatal(string message, Exception? exception = null) { }
+    }
+
     [Fact]
     public async Task CreateTask_ValidatesCoordinateRanges()
     {
         using var dbHelper = new TestDatabaseHelper();
         var repository = new TaskRepository(dbHelper.ConnectionString);
-        var manager = new TaskManager(repository);
+        var manager = new TaskManager(repository, new TestLogger());
 
         var task = new TaskEntity
         {
@@ -35,7 +44,7 @@ public class TaskManagerTests
     {
         using var dbHelper = new TestDatabaseHelper();
         var repository = new TaskRepository(dbHelper.ConnectionString);
-        var manager = new TaskManager(repository);
+        var manager = new TaskManager(repository, new TestLogger());
 
         var task1 = new TaskEntity
         {

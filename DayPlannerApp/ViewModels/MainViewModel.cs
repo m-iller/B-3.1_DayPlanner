@@ -10,6 +10,9 @@ public class MainViewModel : ViewModelBase
     private readonly ITimeTracker _timeTracker;
     private readonly ICalendarViewManager _calendarViewManager;
     private readonly ICoordinateController _coordinateController;
+    private readonly ITaskTypeManager _taskTypeManager;
+    private readonly INotificationService _notificationService;
+    private readonly ILogger _logger;
 
     private ViewModelBase? _currentView;
 
@@ -18,18 +21,25 @@ public class MainViewModel : ViewModelBase
         ITagManager tagManager,
         ITimeTracker timeTracker,
         ICalendarViewManager calendarViewManager,
-        ICoordinateController coordinateController)
+        ICoordinateController coordinateController,
+        ITaskTypeManager taskTypeManager,
+        INotificationService notificationService,
+        ILogger logger)
     {
         _taskManager = taskManager;
         _tagManager = tagManager;
         _timeTracker = timeTracker;
         _calendarViewManager = calendarViewManager;
         _coordinateController = coordinateController;
+        _taskTypeManager = taskTypeManager;
+        _notificationService = notificationService;
+        _logger = logger;
 
         NavigateToTaskListCommand = new RelayCommand(NavigateToTaskList);
         NavigateToDayViewCommand = new RelayCommand(NavigateToDayView);
         NavigateToWeekViewCommand = new RelayCommand(NavigateToWeekView);
         NavigateToCoordinateControllerCommand = new RelayCommand(NavigateToCoordinateController);
+        NavigateToSettingsCommand = new RelayCommand(NavigateToSettings);
     }
 
     public ViewModelBase? CurrentView
@@ -42,6 +52,7 @@ public class MainViewModel : ViewModelBase
     public ICommand NavigateToDayViewCommand { get; }
     public ICommand NavigateToWeekViewCommand { get; }
     public ICommand NavigateToCoordinateControllerCommand { get; }
+    public ICommand NavigateToSettingsCommand { get; }
 
     private void NavigateToTaskList()
     {
@@ -61,5 +72,12 @@ public class MainViewModel : ViewModelBase
     private void NavigateToCoordinateController()
     {
         CurrentView = new CoordinateControllerViewModel(_coordinateController, _taskManager);
+    }
+
+    private void NavigateToSettings()
+    {
+        var settingsVm = new SettingsViewModel(_taskTypeManager, _notificationService, _logger);
+        _ = settingsVm.LoadAsync();
+        CurrentView = settingsVm;
     }
 }

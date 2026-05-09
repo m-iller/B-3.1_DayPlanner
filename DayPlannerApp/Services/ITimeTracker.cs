@@ -15,4 +15,5 @@ public interface ITimeTracker
     TimeTrackingSession? GetCurrentSession(Guid taskId);
     Task<TimeSpan> GetTotalTaskDurationAsync(Guid taskId);
     Task<TimeSpan> GetTotalBreakTimeAsync(Guid taskId);
+    Task StopAllActiveSessionsAsync();
 }

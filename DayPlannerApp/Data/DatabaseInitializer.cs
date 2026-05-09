@@ -8,7 +8,9 @@ namespace DayPlannerApp.Data;
 public class DatabaseInitializer
 {
     private const string DATABASE_FILENAME = "dayplanner.db";
+    private const int CURRENT_SCHEMA_VERSION = 1;
     private readonly string _connectionString;
+    private readonly string _databasePath;
 
     public DatabaseInitializer()
     {
@@ -16,29 +18,65 @@ public class DatabaseInitializer
         var dbDirectory = Path.Combine(appDataPath, "DayPlannerApp");
         Directory.CreateDirectory(dbDirectory);
         
-        var dbPath = Path.Combine(dbDirectory, DATABASE_FILENAME);
-        _connectionString = $"Data Source={dbPath}";
+        _databasePath = Path.Combine(dbDirectory, DATABASE_FILENAME);
+        _connectionString = $"Data Source={_databasePath}";
     }
 
     public string ConnectionString => _connectionString;
+    public string DatabasePath => _databasePath;
 
     public async Task InitializeAsync()
     {
-        using var connection = new SqliteConnection(_connectionString);
-        await connection.OpenAsync();
-
-        // Enable foreign keys
-        using (var command = connection.CreateCommand())
+        try
         {
-            command.CommandText = "PRAGMA foreign_keys = ON;";
-            await command.ExecuteNonQueryAsync();
-        }
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
 
-        // Create tables
-        await CreateTablesAsync(connection);
-        
-        // Seed default data
-        await SeedDefaultDataAsync(connection);
+            // Enable foreign keys and WAL mode for better concurrency
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;";
+                await command.ExecuteNonQueryAsync();
+            }
+
+            // Check schema version and migrate if needed
+            var currentVersion = await GetSchemaVersionAsync(connection);
+            if (currentVersion == 0)
+            {
+                // First run - create all tables
+                await CreateTablesAsync(connection);
+                await SetSchemaVersionAsync(connection, CURRENT_SCHEMA_VERSION);
+                await SeedDefaultDataAsync(connection);
+            }
+            else if (currentVersion < CURRENT_SCHEMA_VERSION)
+            {
+                // Migration needed
+                await MigrateSchemaAsync(connection, currentVersion, CURRENT_SCHEMA_VERSION);
+            }
+        }
+        catch (SqliteException ex)
+        {
+            throw new DatabaseInitializationException("Failed to initialize database", ex);
+        }
+    }
+
+    public async Task<bool> ValidateDatabaseIntegrityAsync()
+    {
+        try
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            await connection.OpenAsync();
+
+            using var command = connection.CreateCommand();
+            command.CommandText = "PRAGMA integrity_check;";
+            var result = await command.ExecuteScalarAsync();
+            
+            return result?.ToString() == "ok";
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private async Task CreateTablesAsync(SqliteConnection connection)
@@ -158,5 +196,55 @@ public class DatabaseInitializer
         using var command = connection.CreateCommand();
         command.CommandText = seedData;
         await command.ExecuteNonQueryAsync();
+    }
+
+    private async Task<int> GetSchemaVersionAsync(SqliteConnection connection)
+    {
+        try
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = "SELECT Value FROM Configuration WHERE Key = 'SchemaVersion';";
+            var result = await command.ExecuteScalarAsync();
+            
+            if (result != null && int.TryParse(result.ToString()?.Trim('"'), out var version))
+            {
+                return version;
+            }
+        }
+        catch (SqliteException)
+        {
+            // Configuration table doesn't exist yet
+        }
+        
+        return 0;
+    }
+
+    private async Task SetSchemaVersionAsync(SqliteConnection connection, int version)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            INSERT INTO Configuration (Key, Value, UpdatedAt)
+            VALUES ('SchemaVersion', @Version, @UpdatedAt)
+            ON CONFLICT(Key) DO UPDATE SET
+                Value = @Version,
+                UpdatedAt = @UpdatedAt";
+        command.Parameters.AddWithValue("@Version", version.ToString());
+        command.Parameters.AddWithValue("@UpdatedAt", DateTime.UtcNow.ToString("o"));
+        await command.ExecuteNonQueryAsync();
+    }
+
+    private async Task MigrateSchemaAsync(SqliteConnection connection, int fromVersion, int toVersion)
+    {
+        // Future migrations would go here
+        // For now, just update version
+        await SetSchemaVersionAsync(connection, toVersion);
+    }
+}
+
+public class DatabaseInitializationException : Exception
+{
+    public DatabaseInitializationException(string message, Exception innerException)
+        : base(message, innerException)
+    {
     }
 }

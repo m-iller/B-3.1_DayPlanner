@@ -9,35 +9,66 @@ namespace DayPlannerApp.Services;
 public class TaskManager : ITaskManager
 {
     private readonly ITaskRepository _taskRepository;
+    private readonly ILogger _logger;
 
-    public TaskManager(ITaskRepository taskRepository)
+    public TaskManager(ITaskRepository taskRepository, ILogger logger)
     {
         _taskRepository = taskRepository ?? throw new ArgumentNullException(nameof(taskRepository));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<TaskEntity> CreateTaskAsync(TaskEntity task)
     {
-        ValidateTask(task);
-        
-        task.Id = Guid.NewGuid();
-        task.CreatedAt = DateTime.UtcNow;
-        task.UpdatedAt = DateTime.UtcNow;
-        
-        return await _taskRepository.InsertAsync(task);
+        try
+        {
+            ValidateTask(task);
+            
+            task.Id = Guid.NewGuid();
+            task.CreatedAt = DateTime.UtcNow;
+            task.UpdatedAt = DateTime.UtcNow;
+            
+            var result = await _taskRepository.InsertAsync(task);
+            _logger.Info($"Task created: {task.Id}");
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to create task", ex);
+            throw;
+        }
     }
 
     public async Task<TaskEntity> UpdateTaskAsync(TaskEntity task)
     {
-        ValidateTask(task);
-        
-        task.UpdatedAt = DateTime.UtcNow;
-        
-        return await _taskRepository.UpdateAsync(task);
+        try
+        {
+            ValidateTask(task);
+            
+            task.UpdatedAt = DateTime.UtcNow;
+            
+            var result = await _taskRepository.UpdateAsync(task);
+            _logger.Info($"Task updated: {task.Id}");
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to update task {task.Id}", ex);
+            throw;
+        }
     }
 
     public async Task DeleteTaskAsync(Guid taskId)
     {
-        await _taskRepository.DeleteAsync(taskId);
+        try
+        {
+            await _taskRepository.DeleteAsync(taskId);
+            _logger.Info($"Task deleted: {taskId}");
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to delete task {taskId}", ex);
+            throw;
+        }
     }
 
     public async Task<TaskEntity?> GetTaskByIdAsync(Guid taskId)

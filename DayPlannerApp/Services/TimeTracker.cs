@@ -11,58 +11,78 @@ namespace DayPlannerApp.Services;
 public class TimeTracker : ITimeTracker
 {
     private readonly ITimeTrackingRepository _repository;
+    private readonly ILogger _logger;
     private readonly Dictionary<Guid, TrackingState> _activeTracking = new();
 
-    public TimeTracker(ITimeTrackingRepository repository)
+    public TimeTracker(ITimeTrackingRepository repository, ILogger logger)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task StartTrackingAsync(Guid taskId)
     {
-        if (_activeTracking.ContainsKey(taskId))
+        try
         {
-            throw new InvalidOperationException($"Tracking already active for task {taskId}");
+            if (_activeTracking.ContainsKey(taskId))
+            {
+                throw new InvalidOperationException($"Tracking already active for task {taskId}");
+            }
+
+            var session = new TimeTrackingSession
+            {
+                Id = Guid.NewGuid(),
+                TaskId = taskId,
+                StartTime = DateTime.UtcNow,
+                Breaks = new List<BreakPeriod>()
+            };
+
+            var state = new TrackingState
+            {
+                Session = session,
+                WorkStopwatch = Stopwatch.StartNew(),
+                BreakStopwatch = new Stopwatch()
+            };
+
+            _activeTracking[taskId] = state;
+            await _repository.InsertSessionAsync(session);
+            _logger.Info($"Time tracking started for task {taskId}");
         }
-
-        var session = new TimeTrackingSession
+        catch (Exception ex)
         {
-            Id = Guid.NewGuid(),
-            TaskId = taskId,
-            StartTime = DateTime.UtcNow,
-            Breaks = new List<BreakPeriod>()
-        };
-
-        var state = new TrackingState
-        {
-            Session = session,
-            WorkStopwatch = Stopwatch.StartNew(),
-            BreakStopwatch = new Stopwatch()
-        };
-
-        _activeTracking[taskId] = state;
-        await _repository.InsertSessionAsync(session);
+            _logger.Error($"Failed to start tracking for task {taskId}", ex);
+            throw;
+        }
     }
 
     public async Task StopTrackingAsync(Guid taskId)
     {
-        if (!_activeTracking.TryGetValue(taskId, out var state))
+        try
         {
-            throw new InvalidOperationException($"No active tracking for task {taskId}");
-        }
+            if (!_activeTracking.TryGetValue(taskId, out var state))
+            {
+                throw new InvalidOperationException($"No active tracking for task {taskId}");
+            }
 
-        if (state.IsOnBreak)
+            if (state.IsOnBreak)
+            {
+                throw new InvalidOperationException("Cannot stop tracking while on break. End break first.");
+            }
+
+            state.WorkStopwatch.Stop();
+            state.Session.EndTime = DateTime.UtcNow;
+            state.Session.TotalDuration = state.WorkStopwatch.Elapsed;
+            state.Session.TotalBreakTime = state.BreakStopwatch.Elapsed;
+
+            await _repository.UpdateSessionAsync(state.Session);
+            _activeTracking.Remove(taskId);
+            _logger.Info($"Time tracking stopped for task {taskId}. Duration: {state.Session.TotalDuration}");
+        }
+        catch (Exception ex)
         {
-            throw new InvalidOperationException("Cannot stop tracking while on break. End break first.");
+            _logger.Error($"Failed to stop tracking for task {taskId}", ex);
+            throw;
         }
-
-        state.WorkStopwatch.Stop();
-        state.Session.EndTime = DateTime.UtcNow;
-        state.Session.TotalDuration = state.WorkStopwatch.Elapsed;
-        state.Session.TotalBreakTime = state.BreakStopwatch.Elapsed;
-
-        await _repository.UpdateSessionAsync(state.Session);
-        _activeTracking.Remove(taskId);
     }
 
     public async Task StartBreakAsync(Guid taskId)
@@ -177,6 +197,41 @@ public class TimeTracker : ITimeTracker
         }
 
         return total;
+    }
+
+    public async Task StopAllActiveSessionsAsync()
+    {
+        var taskIds = _activeTracking.Keys.ToList();
+        
+        foreach (var taskId in taskIds)
+        {
+            try
+            {
+                var state = _activeTracking[taskId];
+                
+                // If on break, end it first
+                if (state.IsOnBreak)
+                {
+                    state.BreakStopwatch.Stop();
+                    var currentBreak = state.Session.Breaks.Last();
+                    currentBreak.EndTime = DateTime.UtcNow;
+                }
+
+                // Stop work tracking
+                state.WorkStopwatch.Stop();
+                state.Session.EndTime = DateTime.UtcNow;
+                state.Session.TotalDuration = state.WorkStopwatch.Elapsed;
+                state.Session.TotalBreakTime = state.BreakStopwatch.Elapsed;
+
+                await _repository.UpdateSessionAsync(state.Session);
+            }
+            catch
+            {
+                // Continue stopping other sessions even if one fails
+            }
+        }
+
+        _activeTracking.Clear();
     }
 
     private class TrackingState

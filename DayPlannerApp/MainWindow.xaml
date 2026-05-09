@@ -8,9 +8,6 @@
         xmlns:views="clr-namespace:DayPlannerApp.Views"
         mc:Ignorable="d"
         Title="Day Planner" Height="700" Width="1200">
-    <Window.DataContext>
-        <vm:MainViewModel/>
-    </Window.DataContext>
     
     <Grid>
         <Grid.RowDefinitions>
@@ -26,6 +23,7 @@
                 <MenuItem Header="Week View" Command="{Binding NavigateToWeekViewCommand}"/>
                 <MenuItem Header="Coordinate Controller" Command="{Binding NavigateToCoordinateControllerCommand}"/>
             </MenuItem>
+            <MenuItem Header="Settings" Command="{Binding NavigateToSettingsCommand}"/>
         </Menu>
         
         <!-- Content Area -->
@@ -42,6 +40,9 @@
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:CoordinateControllerViewModel}">
                     <views:CoordinateControllerView/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+                    <views:SettingsView/>
                 </DataTemplate>
             </ContentControl.Resources>
         </ContentControl>
