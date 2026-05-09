@@ -1,0 +1,188 @@
+<UserControl x:Class="DayPlannerApp.Views.TaskListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DayPlannerApp.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000">
+    <UserControl.Resources>
+        <local:DeadlineProximityConverter x:Key="DeadlineProximityConverter"/>
+        <local:DeadlineProximityTextConverter x:Key="DeadlineProximityTextConverter"/>
+    </UserControl.Resources>
+    
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Filter Controls -->
+        <GroupBox Grid.Row="0" Header="Filters" Padding="10" Margin="0,0,0,10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Tag Filter -->
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,5">
+                    <TextBlock Text="Filter by Tag:" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding FilterTag, UpdateSourceTrigger=PropertyChanged}" 
+                             Height="25"/>
+                </StackPanel>
+                
+                <!-- Type Filter -->
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,10,5">
+                    <TextBlock Text="Filter by Type:" Margin="0,0,0,5"/>
+                    <ComboBox SelectedValue="{Binding FilterTypeId}" Height="25">
+                        <ComboBoxItem Content="All Types" Tag="{x:Null}"/>
+                        <ComboBoxItem Content="Personal Projects" Tag="1"/>
+                        <ComboBoxItem Content="Learning" Tag="2"/>
+                        <ComboBoxItem Content="Work" Tag="3"/>
+                        <ComboBoxItem Content="Must Do" Tag="4"/>
+                    </ComboBox>
+                </StackPanel>
+                
+                <!-- Date Range Filter -->
+                <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,10,5">
+                    <TextBlock Text="Date Range:" Margin="0,0,0,5"/>
+                    <StackPanel Orientation="Horizontal">
+                        <DatePicker SelectedDate="{Binding FilterStartDate}" Width="120" Margin="0,0,5,0"/>
+                        <TextBlock Text="to" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <DatePicker SelectedDate="{Binding FilterEndDate}" Width="120"/>
+                    </StackPanel>
+                </StackPanel>
+                
+                <!-- Filter Buttons -->
+                <StackPanel Grid.Row="0" Grid.Column="3" VerticalAlignment="Bottom" Margin="0,0,0,5">
+                    <Button Content="Apply Filters" Command="{Binding FilterByDateRangeCommand}" 
+                            Height="25" Width="100" Margin="0,0,0,5"/>
+                    <Button Content="Clear Filters" Command="{Binding ClearFiltersCommand}" 
+                            Height="25" Width="100"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+        
+        <!-- Sort Controls -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
+            <Button Content="Sort by Urgency" Command="{Binding SortByUrgencyCommand}" 
+                    Width="120" Height="30" Margin="0,0,10,0"/>
+            <Button Content="Sort by Deadline" Command="{Binding SortByDeadlineCommand}" 
+                    Width="120" Height="30" Margin="0,0,10,0"/>
+            <Button Content="Load Tasks" Command="{Binding LoadTasksCommand}" 
+                    Width="100" Height="30"/>
+        </StackPanel>
+        
+        <!-- Task List -->
+        <DataGrid Grid.Row="2" 
+                  ItemsSource="{Binding Tasks}" 
+                  SelectedItem="{Binding SelectedTask}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  SelectionMode="Single"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  GridLinesVisibility="Horizontal"
+                  AlternatingRowBackground="#F9F9F9">
+            <DataGrid.Columns>
+                <!-- Task Type Indicator -->
+                <DataGridTemplateColumn Header="Type" Width="60">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Width="40" Height="20" CornerRadius="3" Margin="5">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding TaskTypeId}" Value="1">
+                                                <Setter Property="Background" Value="#4CAF50"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding TaskTypeId}" Value="2">
+                                                <Setter Property="Background" Value="#2196F3"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding TaskTypeId}" Value="3">
+                                                <Setter Property="Background" Value="#FF9800"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding TaskTypeId}" Value="4">
+                                                <Setter Property="Background" Value="#F44336"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding TaskTypeId}" 
+                                          Foreground="White" 
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center"
+                                          FontWeight="Bold"/>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                
+                <!-- Description -->
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*" MinWidth="200"/>
+                
+                <!-- Tags -->
+                <DataGridTemplateColumn Header="Tags" Width="150">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ItemsControl ItemsSource="{Binding Tags}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#E0E0E0" 
+                                               CornerRadius="3" 
+                                               Padding="5,2" 
+                                               Margin="2">
+                                            <TextBlock Text="{Binding}" FontSize="10"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                
+                <!-- Deadline with Proximity Indicator -->
+                <DataGridTemplateColumn Header="Deadline" Width="150">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding DeadlineDate, StringFormat='{}{0:yyyy-MM-dd}'}" 
+                                          FontWeight="Bold"
+                                          Foreground="{Binding DeadlineDate, Converter={StaticResource DeadlineProximityConverter}}"/>
+                                <TextBlock Text="{Binding DeadlineTime, StringFormat='{}{0:hh\\:mm}'}" 
+                                          FontSize="10" 
+                                          Foreground="Gray"/>
+                                <TextBlock Text="{Binding DeadlineDate, Converter={StaticResource DeadlineProximityTextConverter}}" 
+                                          FontSize="9" 
+                                          FontWeight="Bold"
+                                          Foreground="{Binding DeadlineDate, Converter={StaticResource DeadlineProximityConverter}}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                
+                <!-- Urgency -->
+                <DataGridTextColumn Header="Urgency" Binding="{Binding UrgencyLevel}" Width="70"/>
+                
+                <!-- Importance -->
+                <DataGridTextColumn Header="Importance" Binding="{Binding Importance, StringFormat='{}{0:F0}'}" Width="80"/>
+                
+                <!-- Complexity -->
+                <DataGridTextColumn Header="Complexity" Binding="{Binding Complexity, StringFormat='{}{0:F0}'}" Width="80"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

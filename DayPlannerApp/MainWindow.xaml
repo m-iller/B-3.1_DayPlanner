@@ -1,0 +1,49 @@
+﻿<Window x:Class="DayPlannerApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DayPlannerApp"
+        xmlns:vm="clr-namespace:DayPlannerApp.ViewModels"
+        xmlns:views="clr-namespace:DayPlannerApp.Views"
+        mc:Ignorable="d"
+        Title="Day Planner" Height="700" Width="1200">
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Navigation Menu -->
+        <Menu Grid.Row="0" Background="#F5F5F5">
+            <MenuItem Header="Views">
+                <MenuItem Header="Task List" Command="{Binding NavigateToTaskListCommand}"/>
+                <MenuItem Header="Day View" Command="{Binding NavigateToDayViewCommand}"/>
+                <MenuItem Header="Week View" Command="{Binding NavigateToWeekViewCommand}"/>
+                <MenuItem Header="Coordinate Controller" Command="{Binding NavigateToCoordinateControllerCommand}"/>
+            </MenuItem>
+        </Menu>
+        
+        <!-- Content Area -->
+        <ContentControl Grid.Row="1" Content="{Binding CurrentView}">
+            <ContentControl.Resources>
+                <DataTemplate DataType="{x:Type vm:TaskListViewModel}">
+                    <views:TaskListView/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:DayViewViewModel}">
+                    <views:DayView/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:WeekViewViewModel}">
+                    <views:WeekView/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:CoordinateControllerViewModel}">
+                    <views:CoordinateControllerView/>
+                </DataTemplate>
+            </ContentControl.Resources>
+        </ContentControl>
+    </Grid>
+</Window>
