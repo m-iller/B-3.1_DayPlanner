@@ -126,6 +126,18 @@ public partial class App : Application
             return new TaskTypeRepository(dbInit.ConnectionString);
         });
 
+        services.AddSingleton<IModuleRepository>(sp =>
+        {
+            var dbInit = sp.GetRequiredService<DatabaseInitializer>();
+            return new ModuleRepository(dbInit.ConnectionString);
+        });
+
+        services.AddSingleton<IIPCAuthTokenRepository>(sp =>
+        {
+            var dbInit = sp.GetRequiredService<DatabaseInitializer>();
+            return new IPCAuthTokenRepository(dbInit.ConnectionString);
+        });
+
         // Register services
         services.AddSingleton<ITimeTracker, TimeTracker>();
         services.AddSingleton<ITaskManager, TaskManager>();
@@ -134,6 +146,10 @@ public partial class App : Application
         services.AddSingleton<IMarkdownProcessor, MarkdownProcessor>();
         services.AddSingleton<ICoordinateController, CoordinateController>();
         services.AddSingleton<ICalendarViewManager, CalendarViewManager>();
+        services.AddSingleton<IModuleManager, ModuleManager>();
+        services.AddSingleton<IIPCAuthenticationService, IPCAuthenticationService>();
+        services.AddSingleton<IIPCRequestHandler, IPCRequestHandler>();
+        services.AddSingleton<IIPCServer, IPCServer>();
 
         // Register lifecycle manager
         services.AddSingleton<ApplicationLifecycleManager>();

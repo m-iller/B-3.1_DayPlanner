@@ -82,6 +82,25 @@ public class TestDatabaseHelper : IDisposable
                 UpdatedAt TEXT NOT NULL
             );
 
+            CREATE TABLE Modules (
+                Id TEXT PRIMARY KEY,
+                Name TEXT NOT NULL,
+                Version TEXT NOT NULL,
+                Description TEXT,
+                AssemblyPath TEXT NOT NULL,
+                IsEnabled INTEGER NOT NULL DEFAULT 1,
+                LoadedAt TEXT,
+                CreatedAt TEXT NOT NULL
+            );
+
+            CREATE TABLE IPCAuthTokens (
+                Token TEXT PRIMARY KEY,
+                Description TEXT,
+                CreatedAt TEXT NOT NULL,
+                ExpiresAt TEXT,
+                LastUsedAt TEXT
+            );
+
             CREATE INDEX idx_tasks_deadline ON Tasks(DeadlineDate);
             CREATE INDEX idx_tasks_type ON Tasks(TaskTypeId);
             CREATE INDEX idx_tasks_urgency ON Tasks(UrgencyLevel);

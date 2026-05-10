@@ -12,17 +12,20 @@ public class ApplicationLifecycleManager
     private readonly DatabaseInitializer _databaseInitializer;
     private readonly ITimeTracker _timeTracker;
     private readonly IConfigurationRepository _configurationRepository;
+    private readonly IIPCAuthenticationService _ipcAuthService;
     private readonly ILogger _logger;
 
     public ApplicationLifecycleManager(
         DatabaseInitializer databaseInitializer,
         ITimeTracker timeTracker,
         IConfigurationRepository configurationRepository,
+        IIPCAuthenticationService ipcAuthService,
         ILogger logger)
     {
         _databaseInitializer = databaseInitializer ?? throw new ArgumentNullException(nameof(databaseInitializer));
         _timeTracker = timeTracker ?? throw new ArgumentNullException(nameof(timeTracker));
         _configurationRepository = configurationRepository ?? throw new ArgumentNullException(nameof(configurationRepository));
+        _ipcAuthService = ipcAuthService ?? throw new ArgumentNullException(nameof(ipcAuthService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -53,6 +56,10 @@ public class ApplicationLifecycleManager
             // Load configuration settings
             _logger.Info("Loading configuration");
             await LoadConfigurationAsync();
+
+            // Ensure IPC authentication token exists
+            _logger.Info("Ensuring IPC authentication token exists");
+            await _ipcAuthService.EnsureTokenExistsAsync();
 
             _logger.Info("Application lifecycle startup complete");
             return new StartupResult { Success = true };

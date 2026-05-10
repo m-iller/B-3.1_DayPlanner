@@ -13,7 +13,7 @@ public class TaskRepositoryPropertyTests
     [Property(MaxTest = 100)]
     public Property TaskCRUDRoundTrip_PreservesAllFields()
     {
-        return Prop.ForAll(
+        return FsCheck.Prop.ForAll(
             TaskEntityGenerator(),
             task =>
             {
@@ -44,7 +44,7 @@ public class TaskRepositoryPropertyTests
     [Property(MaxTest = 100)]
     public Property TaskUpdatePreservation_UpdatesOnlyModifiedFields()
     {
-        return Prop.ForAll(
+        return FsCheck.Prop.ForAll(
             TaskEntityGenerator(),
             TaskEntityGenerator(),
             (originalTask, updateData) =>
@@ -91,24 +91,24 @@ public class TaskRepositoryPropertyTests
 
     private static Arbitrary<TaskEntity> TaskEntityGenerator()
     {
-        var gen = from description in Arb.Generate<NonEmptyString>()
-                  from taskTypeId in Gen.Choose(1, 4)
-                  from deadlineDate in Gen.OneOf(
-                      Gen.Constant<DateTime?>(null),
-                      Arb.Generate<DateTime>().Select(d => (DateTime?)d.Date))
-                  from deadlineTime in Gen.OneOf(
-                      Gen.Constant<TimeSpan?>(null),
-                      Gen.Choose(0, 86399).Select(s => (TimeSpan?)TimeSpan.FromSeconds(s)))
-                  from importance in Gen.OneOf(
-                      Gen.Constant<double?>(null),
-                      Gen.Choose(0, 100).Select(i => (double?)i))
-                  from complexity in Gen.OneOf(
-                      Gen.Constant<double?>(null),
-                      Gen.Choose(0, 100).Select(i => (double?)i))
-                  from urgencyLevel in Gen.Choose(0, 10)
-                  from createdAt in Arb.Generate<DateTime>()
-                  from updatedAt in Arb.Generate<DateTime>()
-                  from tags in Gen.ListOf(Arb.Generate<NonEmptyString>().Select(s => s.Get))
+        var gen = from description in FsCheck.Arb.Generate<NonEmptyString>()
+                  from taskTypeId in FsCheck.Gen.Choose(1, 4)
+                  from deadlineDate in FsCheck.Gen.OneOf(
+                      FsCheck.Gen.Constant<DateTime?>(null),
+                      FsCheck.Arb.Generate<DateTime>().Select(d => (DateTime?)d.Date))
+                  from deadlineTime in FsCheck.Gen.OneOf(
+                      FsCheck.Gen.Constant<TimeSpan?>(null),
+                      FsCheck.Gen.Choose(0, 86399).Select(s => (TimeSpan?)TimeSpan.FromSeconds(s)))
+                  from importance in FsCheck.Gen.OneOf(
+                      FsCheck.Gen.Constant<double?>(null),
+                      FsCheck.Gen.Choose(0, 100).Select(i => (double?)i))
+                  from complexity in FsCheck.Gen.OneOf(
+                      FsCheck.Gen.Constant<double?>(null),
+                      FsCheck.Gen.Choose(0, 100).Select(i => (double?)i))
+                  from urgencyLevel in FsCheck.Gen.Choose(0, 10)
+                  from createdAt in FsCheck.Arb.Generate<DateTime>()
+                  from updatedAt in FsCheck.Arb.Generate<DateTime>()
+                  from tags in FsCheck.Gen.ListOf(FsCheck.Arb.Generate<NonEmptyString>().Select(s => s.Get))
                   select new TaskEntity
                   {
                       Id = Guid.NewGuid(),
@@ -124,7 +124,7 @@ public class TaskRepositoryPropertyTests
                       Tags = tags.Distinct().ToList()
                   };
 
-        return Arb.From(gen);
+        return FsCheck.Arb.From(gen);
     }
 
     private static bool TagsEqual(List<string> tags1, List<string> tags2)
