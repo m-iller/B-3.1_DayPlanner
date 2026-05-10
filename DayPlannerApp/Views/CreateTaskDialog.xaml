@@ -1,0 +1,102 @@
+<Window x:Class="DayPlannerApp.Views.CreateTaskDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Create Task" 
+        Height="600" 
+        Width="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Description -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+            <TextBlock Text="Description:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <TextBox x:Name="DescriptionTextBox" 
+                     Height="80" 
+                     TextWrapping="Wrap" 
+                     AcceptsReturn="True"
+                     VerticalScrollBarVisibility="Auto"/>
+        </StackPanel>
+
+        <!-- Task Type -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,15">
+            <TextBlock Text="Task Type:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <ComboBox x:Name="TaskTypeComboBox" 
+                      DisplayMemberPath="Name"
+                      SelectedValuePath="Id"/>
+        </StackPanel>
+
+        <!-- Date -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,15">
+            <TextBlock Text="Deadline Date:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <DatePicker x:Name="DeadlineDatePicker"/>
+        </StackPanel>
+
+        <!-- Time -->
+        <StackPanel Grid.Row="3" Margin="0,0,0,15">
+            <TextBlock Text="Deadline Time (optional):" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <StackPanel Orientation="Horizontal">
+                <ComboBox x:Name="HourComboBox" Width="60" Margin="0,0,5,0"/>
+                <TextBlock Text=":" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <ComboBox x:Name="MinuteComboBox" Width="60"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Urgency -->
+        <StackPanel Grid.Row="4" Margin="0,0,0,15">
+            <TextBlock Text="Urgency Level:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <Slider x:Name="UrgencySlider" 
+                    Minimum="0" 
+                    Maximum="10" 
+                    TickFrequency="1" 
+                    IsSnapToTickEnabled="True"
+                    Value="5"/>
+            <TextBlock Text="{Binding ElementName=UrgencySlider, Path=Value}" 
+                       HorizontalAlignment="Center"/>
+        </StackPanel>
+
+        <!-- Coordinates -->
+        <StackPanel Grid.Row="5" Margin="0,0,0,15">
+            <TextBlock Text="Importance / Complexity (optional):" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Importance:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox x:Name="ImportanceTextBox" Width="60" Margin="0,0,15,0" Text="50"/>
+                <TextBlock Text="Complexity:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox x:Name="ComplexityTextBox" Width="60" Text="50"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Tags -->
+        <StackPanel Grid.Row="6" Margin="0,0,0,15">
+            <TextBlock Text="Tags:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <ListBox x:Name="TagsListBox" 
+                     Height="100"
+                     SelectionMode="Multiple"/>
+        </StackPanel>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Create" 
+                    Width="100" 
+                    Height="35" 
+                    Margin="0,0,10,0"
+                    Click="CreateButton_Click"
+                    IsDefault="True"/>
+            <Button Content="Cancel" 
+                    Width="100" 
+                    Height="35"
+                    Click="CancelButton_Click"
+                    IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

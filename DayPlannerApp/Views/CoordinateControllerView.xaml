@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DayPlannerApp.Views"
+             xmlns:converters="clr-namespace:DayPlannerApp.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1000">
     <Grid Margin="10">
@@ -200,8 +201,8 @@
     </Grid>
     
     <UserControl.Resources>
-        <local:PercentageConverter x:Key="PercentageConverter"/>
-        <local:CoordinateToCanvasConverter x:Key="CoordinateToCanvasConverter"/>
-        <local:InvertedCoordinateToCanvasConverter x:Key="InvertedCoordinateToCanvasConverter"/>
+        <converters:PercentageConverter x:Key="PercentageConverter"/>
+        <converters:CoordinateToCanvasConverter x:Key="CoordinateToCanvasConverter"/>
+        <converters:InvertedCoordinateToCanvasConverter x:Key="InvertedCoordinateToCanvasConverter"/>
     </UserControl.Resources>
 </UserControl>
