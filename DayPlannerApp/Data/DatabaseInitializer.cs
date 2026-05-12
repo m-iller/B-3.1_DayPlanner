@@ -8,7 +8,7 @@ namespace DayPlannerApp.Data;
 public class DatabaseInitializer
 {
     private const string DATABASE_FILENAME = "dayplanner.db";
-    private const int CURRENT_SCHEMA_VERSION = 1;
+    private const int CURRENT_SCHEMA_VERSION = 2;
     private readonly string _connectionString;
     private readonly string _databasePath;
 
@@ -98,6 +98,7 @@ public class DatabaseInitializer
                 Importance REAL,
                 Complexity REAL,
                 UrgencyLevel INTEGER NOT NULL DEFAULT 0,
+                IsCompleted INTEGER NOT NULL DEFAULT 0,
                 CreatedAt TEXT NOT NULL,
                 UpdatedAt TEXT NOT NULL,
                 FOREIGN KEY (TaskTypeId) REFERENCES TaskTypes(Id)
@@ -236,8 +237,14 @@ public class DatabaseInitializer
 
     private async Task MigrateSchemaAsync(SqliteConnection connection, int fromVersion, int toVersion)
     {
-        // Future migrations would go here
-        // For now, just update version
+        // Version 1 -> 2: Add IsCompleted column
+        if (fromVersion < 2 && toVersion >= 2)
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = "ALTER TABLE Tasks ADD COLUMN IsCompleted INTEGER NOT NULL DEFAULT 0";
+            await command.ExecuteNonQueryAsync();
+        }
+
         await SetSchemaVersionAsync(connection, toVersion);
     }
 }

@@ -25,7 +25,7 @@ public class MainViewModel : ViewModelBase
     {
         // Create all ViewModels upfront
         TaskListViewModel = new TaskListViewModel(taskManager, tagManager, taskTypeManager, serviceProvider);
-        DayViewViewModel = new DayViewViewModel(calendarViewManager);
+        DayViewViewModel = new DayViewViewModel(calendarViewManager, timeTracker, taskManager, notificationService, logger);
         WeekViewViewModel = new WeekViewViewModel(calendarViewManager);
         CoordinateControllerViewModel = new CoordinateControllerViewModel(coordinateController, taskManager);
         SettingsViewModel = new SettingsViewModel(taskTypeManager, tagManager, notificationService, logger);

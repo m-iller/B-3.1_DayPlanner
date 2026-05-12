@@ -40,10 +40,13 @@ public partial class EditTaskDialog : Window
             TaskTypeComboBox.ItemsSource = taskTypes;
             TaskTypeComboBox.SelectedValue = _task.TaskTypeId;
 
-            // Load tags
+            // Load all available tags for the dropdown
             var allTags = await _tagManager.GetAllTagsAsync();
             var tagNames = allTags.Select(t => t.Name).ToList();
-            TagsListBox.ItemsSource = tagNames;
+            AvailableTagsComboBox.ItemsSource = tagNames;
+
+            // Display task's selected tags
+            SelectedTagsDisplay.ItemsSource = _task.Tags;
 
             // Populate hours (0-23)
             for (int i = 0; i < 24; i++)
@@ -87,16 +90,6 @@ public partial class EditTaskDialog : Window
             if (_task.Complexity.HasValue)
             {
                 ComplexityTextBox.Text = _task.Complexity.Value.ToString("F0");
-            }
-
-            // Select existing tags
-            foreach (var tag in _task.Tags)
-            {
-                var index = tagNames.IndexOf(tag);
-                if (index >= 0)
-                {
-                    TagsListBox.SelectedItems.Add(tag);
-                }
             }
         }
         catch (Exception ex)
@@ -178,9 +171,8 @@ public partial class EditTaskDialog : Window
                 _task.Complexity = null;
             }
 
-            // Set tags
-            var selectedTags = TagsListBox.SelectedItems.Cast<string>().ToList();
-            _task.Tags = selectedTags;
+            // Set tags from selected tags display
+            _task.Tags = SelectedTagsDisplay.ItemsSource?.Cast<string>().ToList() ?? new List<string>();
 
             // Update task
             UpdatedTask = await _taskManager.UpdateTaskAsync(_task);
@@ -200,36 +192,61 @@ public partial class EditTaskDialog : Window
         Close();
     }
 
-    private async void AddTagButton_Click(object sender, RoutedEventArgs e)
+    private async void AddTagToTaskButton_Click(object sender, RoutedEventArgs e)
     {
-        var tagName = Microsoft.VisualBasic.Interaction.InputBox("Enter new tag name:", "Add Tag", "");
+        var tagName = AvailableTagsComboBox.Text?.Trim();
         
-        if (!string.IsNullOrWhiteSpace(tagName))
+        if (string.IsNullOrWhiteSpace(tagName))
         {
-            try
+            MessageBox.Show("Please enter or select a tag name.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        try
+        {
+            // Check if tag already added to task
+            var currentTags = SelectedTagsDisplay.ItemsSource?.Cast<string>().ToList() ?? new List<string>();
+            if (currentTags.Contains(tagName))
             {
-                await _tagManager.CreateTagAsync(tagName.Trim());
-                
-                // Reload tags
-                var allTags = await _tagManager.GetAllTagsAsync();
-                var tagNames = allTags.Select(t => t.Name).ToList();
-                TagsListBox.ItemsSource = tagNames;
-                
-                // Select the new tag
-                TagsListBox.SelectedItems.Add(tagName.Trim());
+                MessageBox.Show("This tag is already added to the task.", "Duplicate Tag", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
             }
-            catch (Exception ex)
+
+            // Create tag in database if it doesn't exist
+            var allTags = await _tagManager.GetAllTagsAsync();
+            if (!allTags.Any(t => t.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase)))
             {
-                MessageBox.Show($"Error adding tag: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                await _tagManager.CreateTagAsync(tagName);
+                
+                // Refresh available tags dropdown
+                var updatedTags = await _tagManager.GetAllTagsAsync();
+                AvailableTagsComboBox.ItemsSource = updatedTags.Select(t => t.Name).ToList();
             }
+
+            // Add tag to task's selected tags
+            currentTags.Add(tagName);
+            SelectedTagsDisplay.ItemsSource = null;
+            SelectedTagsDisplay.ItemsSource = currentTags;
+
+            // Clear input
+            AvailableTagsComboBox.Text = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error adding tag: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
-    private void RemoveTagButton_Click(object sender, RoutedEventArgs e)
+    private void RemoveSelectedTagButton_Click(object sender, RoutedEventArgs e)
     {
         if (sender is System.Windows.Controls.Button button && button.Tag is string tagName)
         {
-            TagsListBox.SelectedItems.Remove(tagName);
+            var currentTags = SelectedTagsDisplay.ItemsSource?.Cast<string>().ToList() ?? new List<string>();
+            currentTags.Remove(tagName);
+            
+            // Refresh display
+            SelectedTagsDisplay.ItemsSource = null;
+            SelectedTagsDisplay.ItemsSource = currentTags;
         }
     }
 }

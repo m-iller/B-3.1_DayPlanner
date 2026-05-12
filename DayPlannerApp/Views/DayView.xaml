@@ -9,10 +9,12 @@
     <UserControl.Resources>
         <local:DeadlineProximityConverter x:Key="DeadlineProximityConverter"/>
         <local:DeadlineProximityTextConverter x:Key="DeadlineProximityTextConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </UserControl.Resources>
     
     <Grid Margin="10">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -77,8 +79,13 @@
                    Margin="10,0,0,0"/>
         </Grid>
         
+        <!-- Daily Statistics Panel -->
+        <local:DailyStatsPanel Grid.Row="2" 
+                              DataContext="{Binding}"
+                              Margin="0,0,0,15"/>
+        
         <!-- Tasks for Day -->
-        <Border Grid.Row="2" 
+        <Border Grid.Row="3" 
                BorderBrush="#E0E0E0" 
                BorderThickness="1" 
                CornerRadius="5"
@@ -103,8 +110,18 @@
                                        BorderThickness="1" 
                                        CornerRadius="5" 
                                        Padding="15" 
-                                       Margin="0,0,0,10"
-                                       Background="White">
+                                       Margin="0,0,0,10">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="White"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                                    <Setter Property="Background" Value="#F5F5F5"/>
+                                                    <Setter Property="Opacity" Value="0.7"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
                                     <Border.Effect>
                                         <DropShadowEffect BlurRadius="5" 
                                                          ShadowDepth="2" 
@@ -113,6 +130,7 @@
                                     
                                     <Grid>
                                         <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/>
@@ -135,22 +153,22 @@
                                                 <Border.Style>
                                                     <Style TargetType="Border">
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding TaskTypeId}" Value="1">
+                                                            <DataTrigger Binding="{Binding Task.TaskTypeId}" Value="1">
                                                                 <Setter Property="Background" Value="#4CAF50"/>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding TaskTypeId}" Value="2">
+                                                            <DataTrigger Binding="{Binding Task.TaskTypeId}" Value="2">
                                                                 <Setter Property="Background" Value="#2196F3"/>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding TaskTypeId}" Value="3">
+                                                            <DataTrigger Binding="{Binding Task.TaskTypeId}" Value="3">
                                                                 <Setter Property="Background" Value="#FF9800"/>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding TaskTypeId}" Value="4">
+                                                            <DataTrigger Binding="{Binding Task.TaskTypeId}" Value="4">
                                                                 <Setter Property="Background" Value="#F44336"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Border.Style>
-                                                <TextBlock Text="{Binding TaskTypeId}" 
+                                                <TextBlock Text="{Binding Task.TaskTypeId}" 
                                                           Foreground="White" 
                                                           HorizontalAlignment="Center" 
                                                           VerticalAlignment="Center"
@@ -159,11 +177,11 @@
                                             
                                             <!-- Deadline Proximity Indicator -->
                                             <Border Grid.Column="1" 
-                                                   Background="{Binding DeadlineDate, Converter={StaticResource DeadlineProximityConverter}}"
+                                                   Background="{Binding Task.DeadlineDate, Converter={StaticResource DeadlineProximityConverter}}"
                                                    CornerRadius="3"
                                                    Padding="8,4"
                                                    HorizontalAlignment="Center">
-                                                <TextBlock Text="{Binding DeadlineDate, Converter={StaticResource DeadlineProximityTextConverter}}" 
+                                                <TextBlock Text="{Binding Task.DeadlineDate, Converter={StaticResource DeadlineProximityTextConverter}}" 
                                                           Foreground="White"
                                                           FontSize="11"
                                                           FontWeight="Bold"/>
@@ -174,7 +192,7 @@
                                                 <TextBlock Text="Urgency: " 
                                                           FontWeight="SemiBold" 
                                                           Margin="0,0,5,0"/>
-                                                <TextBlock Text="{Binding UrgencyLevel}" 
+                                                <TextBlock Text="{Binding Task.UrgencyLevel}" 
                                                           FontWeight="Bold"
                                                           Foreground="#F44336"/>
                                             </StackPanel>
@@ -182,20 +200,31 @@
                                         
                                         <!-- Description -->
                                         <TextBlock Grid.Row="1" 
-                                                  Text="{Binding Description}" 
+                                                  Text="{Binding Task.Description}" 
                                                   TextWrapping="Wrap" 
                                                   FontSize="14"
-                                                  Margin="0,0,0,10"/>
+                                                  Margin="0,0,0,10">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                                            <Setter Property="TextDecorations" Value="Strikethrough"/>
+                                                            <Setter Property="Foreground" Value="#9E9E9E"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
                                         
                                         <!-- Footer with Tags and Deadline Time -->
-                                        <Grid Grid.Row="2">
+                                        <Grid Grid.Row="2" Margin="0,0,0,10">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             
                                             <!-- Tags -->
-                                            <ItemsControl Grid.Column="0" ItemsSource="{Binding Tags}">
+                                            <ItemsControl Grid.Column="0" ItemsSource="{Binding Task.Tags}">
                                                 <ItemsControl.ItemsPanel>
                                                     <ItemsPanelTemplate>
                                                         <WrapPanel/>
@@ -215,12 +244,286 @@
                                             
                                             <!-- Deadline Time -->
                                             <TextBlock Grid.Column="1" 
-                                                      Text="{Binding DeadlineTime, StringFormat='⏰ {0:hh\\:mm}'}" 
+                                                      Text="{Binding Task.DeadlineTime, StringFormat='⏰ {0:hh\\:mm}'}" 
                                                       FontSize="12"
                                                       FontWeight="SemiBold"
                                                       Foreground="#FF9800"
                                                       VerticalAlignment="Center"/>
                                         </Grid>
+                                        
+                                        <!-- Time Tracking Controls -->
+                                        <Border Grid.Row="3" 
+                                               Background="#F5F5F5" 
+                                               BorderBrush="#E0E0E0" 
+                                               BorderThickness="1" 
+                                               CornerRadius="5" 
+                                               Padding="10">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                
+                                                <!-- Buttons Row -->
+                                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+                                                    <!-- Start Button -->
+                                                    <Button Content="▶ Start" 
+                                                           Command="{Binding StartTrackingCommand}"
+                                                           Width="80" 
+                                                           Height="30"
+                                                           Margin="0,0,5,0"
+                                                           Background="#4CAF50"
+                                                           Foreground="White"
+                                                           BorderThickness="0"
+                                                           FontWeight="SemiBold">
+                                                        <Button.Style>
+                                                            <Style TargetType="Button">
+                                                                <Setter Property="Template">
+                                                                    <Setter.Value>
+                                                                        <ControlTemplate TargetType="Button">
+                                                                            <Border Background="{TemplateBinding Background}"
+                                                                                   CornerRadius="3"
+                                                                                   BorderThickness="0">
+                                                                                <ContentPresenter HorizontalAlignment="Center" 
+                                                                                                VerticalAlignment="Center"/>
+                                                                            </Border>
+                                                                        </ControlTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                                <Style.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter Property="Background" Value="#45A049"/>
+                                                                    </Trigger>
+                                                                    <Trigger Property="IsEnabled" Value="False">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </Trigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+                                                    
+                                                    <!-- Pause Button -->
+                                                    <Button Content="⏸ Pause" 
+                                                           Command="{Binding PauseTrackingCommand}"
+                                                           Width="80" 
+                                                           Height="30"
+                                                           Margin="0,0,5,0"
+                                                           Background="#FF9800"
+                                                           Foreground="White"
+                                                           BorderThickness="0"
+                                                           FontWeight="SemiBold">
+                                                        <Button.Style>
+                                                            <Style TargetType="Button">
+                                                                <Setter Property="Template">
+                                                                    <Setter.Value>
+                                                                        <ControlTemplate TargetType="Button">
+                                                                            <Border Background="{TemplateBinding Background}"
+                                                                                   CornerRadius="3"
+                                                                                   BorderThickness="0">
+                                                                                <ContentPresenter HorizontalAlignment="Center" 
+                                                                                                VerticalAlignment="Center"/>
+                                                                            </Border>
+                                                                        </ControlTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                                <Style.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter Property="Background" Value="#F57C00"/>
+                                                                    </Trigger>
+                                                                    <Trigger Property="IsEnabled" Value="False">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </Trigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+                                                    
+                                                    <!-- Resume Button -->
+                                                    <Button Content="▶ Resume" 
+                                                           Command="{Binding ResumeTrackingCommand}"
+                                                           Width="80" 
+                                                           Height="30"
+                                                           Margin="0,0,5,0"
+                                                           Background="#2196F3"
+                                                           Foreground="White"
+                                                           BorderThickness="0"
+                                                           FontWeight="SemiBold">
+                                                        <Button.Style>
+                                                            <Style TargetType="Button">
+                                                                <Setter Property="Template">
+                                                                    <Setter.Value>
+                                                                        <ControlTemplate TargetType="Button">
+                                                                            <Border Background="{TemplateBinding Background}"
+                                                                                   CornerRadius="3"
+                                                                                   BorderThickness="0">
+                                                                                <ContentPresenter HorizontalAlignment="Center" 
+                                                                                                VerticalAlignment="Center"/>
+                                                                            </Border>
+                                                                        </ControlTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                                <Style.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter Property="Background" Value="#1976D2"/>
+                                                                    </Trigger>
+                                                                    <Trigger Property="IsEnabled" Value="False">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </Trigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+                                                    
+                                                    <!-- Complete Button -->
+                                                    <Button Content="✓ Complete" 
+                                                           Command="{Binding CompleteTrackingCommand}"
+                                                           Width="90" 
+                                                           Height="30"
+                                                           Margin="0,0,5,0"
+                                                           Background="#F44336"
+                                                           Foreground="White"
+                                                           BorderThickness="0"
+                                                           FontWeight="SemiBold">
+                                                        <Button.Style>
+                                                            <Style TargetType="Button">
+                                                                <Setter Property="Template">
+                                                                    <Setter.Value>
+                                                                        <ControlTemplate TargetType="Button">
+                                                                            <Border Background="{TemplateBinding Background}"
+                                                                                   CornerRadius="3"
+                                                                                   BorderThickness="0">
+                                                                                <ContentPresenter HorizontalAlignment="Center" 
+                                                                                                VerticalAlignment="Center"/>
+                                                                            </Border>
+                                                                        </ControlTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                                <Style.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter Property="Background" Value="#D32F2F"/>
+                                                                    </Trigger>
+                                                                    <Trigger Property="IsEnabled" Value="False">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </Trigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+                                                    
+                                                    <!-- Mark Complete Button (for non-tracking tasks) -->
+                                                    <Button Content="✓ Mark Done" 
+                                                           Command="{Binding MarkCompleteCommand}"
+                                                           Width="90" 
+                                                           Height="30"
+                                                           Margin="0,0,5,0"
+                                                           Background="#9C27B0"
+                                                           Foreground="White"
+                                                           BorderThickness="0"
+                                                           FontWeight="SemiBold">
+                                                        <Button.Style>
+                                                            <Style TargetType="Button">
+                                                                <Setter Property="Template">
+                                                                    <Setter.Value>
+                                                                        <ControlTemplate TargetType="Button">
+                                                                            <Border Background="{TemplateBinding Background}"
+                                                                                   CornerRadius="3"
+                                                                                   BorderThickness="0">
+                                                                                <ContentPresenter HorizontalAlignment="Center" 
+                                                                                                VerticalAlignment="Center"/>
+                                                                            </Border>
+                                                                        </ControlTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                                <Style.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter Property="Background" Value="#7B1FA2"/>
+                                                                    </Trigger>
+                                                                    <Trigger Property="IsEnabled" Value="False">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </Trigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+                                                    
+                                                    <!-- Uncomplete Button (for completed tasks) -->
+                                                    <Button Content="↶ Undo" 
+                                                           Command="{Binding MarkIncompleteCommand}"
+                                                           Width="80" 
+                                                           Height="30"
+                                                           Margin="0,0,5,0"
+                                                           Background="#607D8B"
+                                                           Foreground="White"
+                                                           BorderThickness="0"
+                                                           FontWeight="SemiBold">
+                                                        <Button.Style>
+                                                            <Style TargetType="Button">
+                                                                <Setter Property="Template">
+                                                                    <Setter.Value>
+                                                                        <ControlTemplate TargetType="Button">
+                                                                            <Border Background="{TemplateBinding Background}"
+                                                                                   CornerRadius="3"
+                                                                                   BorderThickness="0">
+                                                                                <ContentPresenter HorizontalAlignment="Center" 
+                                                                                                VerticalAlignment="Center"/>
+                                                                            </Border>
+                                                                        </ControlTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                                <Style.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter Property="Background" Value="#455A64"/>
+                                                                    </Trigger>
+                                                                    <Trigger Property="IsEnabled" Value="False">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </Trigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+                                                </StackPanel>
+                                                
+                                                <!-- Time Display Row -->
+                                                <Grid Grid.Row="1">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    
+                                                    <!-- Tracking State -->
+                                                    <TextBlock Grid.Column="0" 
+                                                              Text="{Binding TrackingStateText}" 
+                                                              FontSize="12"
+                                                              FontWeight="SemiBold"
+                                                              VerticalAlignment="Center"
+                                                              Margin="0,0,10,0"/>
+                                                    
+                                                    <!-- Elapsed Time -->
+                                                    <StackPanel Grid.Column="2" 
+                                                               Orientation="Horizontal"
+                                                               HorizontalAlignment="Right"
+                                                               VerticalAlignment="Center">
+                                                        <TextBlock Text="Elapsed: " 
+                                                                  FontSize="14"
+                                                                  FontWeight="Bold"/>
+                                                        <TextBlock Text="{Binding DisplayTime}" 
+                                                                  FontSize="14"
+                                                                  FontWeight="Bold"
+                                                                  Foreground="#4CAF50"/>
+                                                        <TextBlock Text=" | Break: " 
+                                                                  FontSize="14"
+                                                                  FontWeight="Bold"
+                                                                  Visibility="{Binding IsOnBreak, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                                        <TextBlock Text="{Binding BreakTime, StringFormat='{}{0:hh\\:mm\\:ss}'}" 
+                                                                  FontSize="14"
+                                                                  FontWeight="Bold"
+                                                                  Foreground="#FF9800"
+                                                                  Visibility="{Binding IsOnBreak, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
                                     </Grid>
                                 </Border>
                             </DataTemplate>

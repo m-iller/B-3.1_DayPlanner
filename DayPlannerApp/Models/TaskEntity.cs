@@ -15,6 +15,7 @@ public class TaskEntity
     public double? Importance { get; set; }
     public double? Complexity { get; set; }
     public int UrgencyLevel { get; set; }
+    public bool IsCompleted { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public List<string> Tags { get; set; } = new();

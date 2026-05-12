@@ -32,9 +32,9 @@ public class TaskRepository : ITaskRepository
                 command.Transaction = transaction;
                 command.CommandText = @"
                     INSERT INTO Tasks (Id, Name, Description, TaskTypeId, DeadlineDate, DeadlineTime, 
-                                       Importance, Complexity, UrgencyLevel, CreatedAt, UpdatedAt)
+                                       Importance, Complexity, UrgencyLevel, IsCompleted, CreatedAt, UpdatedAt)
                     VALUES (@Id, @Name, @Description, @TaskTypeId, @DeadlineDate, @DeadlineTime, 
-                            @Importance, @Complexity, @UrgencyLevel, @CreatedAt, @UpdatedAt)";
+                            @Importance, @Complexity, @UrgencyLevel, @IsCompleted, @CreatedAt, @UpdatedAt)";
 
                 command.Parameters.AddWithValue("@Id", task.Id.ToString());
                 command.Parameters.AddWithValue("@Name", task.Name);
@@ -45,6 +45,7 @@ public class TaskRepository : ITaskRepository
                 command.Parameters.AddWithValue("@Importance", task.Importance ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@Complexity", task.Complexity ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@UrgencyLevel", task.UrgencyLevel);
+                command.Parameters.AddWithValue("@IsCompleted", task.IsCompleted ? 1 : 0);
                 command.Parameters.AddWithValue("@CreatedAt", task.CreatedAt.ToString("o"));
                 command.Parameters.AddWithValue("@UpdatedAt", task.UpdatedAt.ToString("o"));
 
@@ -116,6 +117,7 @@ public class TaskRepository : ITaskRepository
                         Importance = @Importance,
                         Complexity = @Complexity,
                         UrgencyLevel = @UrgencyLevel,
+                        IsCompleted = @IsCompleted,
                         UpdatedAt = @UpdatedAt
                     WHERE Id = @Id";
 
@@ -128,6 +130,7 @@ public class TaskRepository : ITaskRepository
                 command.Parameters.AddWithValue("@Importance", task.Importance ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@Complexity", task.Complexity ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@UrgencyLevel", task.UrgencyLevel);
+                command.Parameters.AddWithValue("@IsCompleted", task.IsCompleted ? 1 : 0);
                 command.Parameters.AddWithValue("@UpdatedAt", task.UpdatedAt.ToString("o"));
 
                 await command.ExecuteNonQueryAsync();
@@ -206,7 +209,7 @@ public class TaskRepository : ITaskRepository
         {
             command.CommandText = @"
                 SELECT t.Id, t.Name, t.Description, t.TaskTypeId, t.DeadlineDate, t.DeadlineTime, 
-                       t.Importance, t.Complexity, t.UrgencyLevel, t.CreatedAt, t.UpdatedAt,
+                       t.Importance, t.Complexity, t.UrgencyLevel, t.IsCompleted, t.CreatedAt, t.UpdatedAt,
                        tt.Name as TaskTypeName
                 FROM Tasks t
                 LEFT JOIN TaskTypes tt ON t.TaskTypeId = tt.Id
@@ -309,7 +312,7 @@ public class TaskRepository : ITaskRepository
 
         var sql = $@"
             SELECT t.Id, t.Name, t.Description, t.TaskTypeId, t.DeadlineDate, t.DeadlineTime, 
-                   t.Importance, t.Complexity, t.UrgencyLevel, t.CreatedAt, t.UpdatedAt,
+                   t.Importance, t.Complexity, t.UrgencyLevel, t.IsCompleted, t.CreatedAt, t.UpdatedAt,
                    tt.Name as TaskTypeName
             FROM Tasks t
             LEFT JOIN TaskTypes tt ON t.TaskTypeId = tt.Id
@@ -371,9 +374,10 @@ public class TaskRepository : ITaskRepository
             Importance = reader.IsDBNull(6) ? null : reader.GetDouble(6),
             Complexity = reader.IsDBNull(7) ? null : reader.GetDouble(7),
             UrgencyLevel = reader.GetInt32(8),
-            CreatedAt = DateTime.Parse(reader.GetString(9)),
-            UpdatedAt = DateTime.Parse(reader.GetString(10)),
-            TaskTypeName = reader.IsDBNull(11) ? string.Empty : reader.GetString(11)
+            IsCompleted = reader.GetInt32(9) == 1,
+            CreatedAt = DateTime.Parse(reader.GetString(10)),
+            UpdatedAt = DateTime.Parse(reader.GetString(11)),
+            TaskTypeName = reader.IsDBNull(12) ? string.Empty : reader.GetString(12)
         };
     }
 }

@@ -85,59 +85,68 @@
 
         <!-- Tags -->
         <StackPanel Grid.Row="7" Margin="0,0,0,15">
+            <TextBlock Text="Tags:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            
+            <!-- Selected Tags Display -->
+            <Border BorderBrush="#CCCCCC" BorderThickness="1" Padding="5" MinHeight="60" Margin="0,0,0,10">
+                <ItemsControl x:Name="SelectedTagsDisplay">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="#2196F3" 
+                                   CornerRadius="3" 
+                                   Padding="8,4" 
+                                   Margin="3">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding}" Foreground="White" Margin="0,0,5,0"/>
+                                    <Button Content="✕" 
+                                           Width="16" 
+                                           Height="16"
+                                           FontSize="10"
+                                           FontWeight="Bold"
+                                           Background="Transparent"
+                                           Foreground="White"
+                                           BorderThickness="0"
+                                           Click="RemoveSelectedTagButton_Click"
+                                           Tag="{Binding}"
+                                           Cursor="Hand"
+                                           ToolTip="Remove tag from task"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+            
+            <!-- Add Tag Section -->
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 
-                <TextBlock Grid.Column="0" Text="Tags:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                <ComboBox x:Name="AvailableTagsComboBox" 
+                         Grid.Column="0"
+                         Height="30"
+                         Margin="0,0,5,0"
+                         IsEditable="True"
+                         ToolTip="Select existing tag or type new tag name"/>
                 
                 <Button Grid.Column="1" 
-                        Content="+" 
-                        Width="30" 
-                        Height="25"
-                        FontSize="16"
-                        FontWeight="Bold"
+                        Content="Add Tag" 
+                        Width="80" 
+                        Height="30"
                         Background="#4CAF50"
                         Foreground="White"
                         BorderThickness="0"
-                        Click="AddTagButton_Click"
-                        ToolTip="Add new tag"/>
+                        FontWeight="SemiBold"
+                        Click="AddTagToTaskButton_Click"
+                        ToolTip="Add tag to this task"/>
             </Grid>
-            
-            <ListBox x:Name="TagsListBox" 
-                     Height="100"
-                     SelectionMode="Multiple">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <TextBlock Grid.Column="0" 
-                                      Text="{Binding}" 
-                                      VerticalAlignment="Center"
-                                      Margin="0,0,10,0"/>
-                            
-                            <Button Grid.Column="1" 
-                                   Content="✕" 
-                                   Width="20" 
-                                   Height="20"
-                                   FontSize="12"
-                                   FontWeight="Bold"
-                                   Background="#F44336"
-                                   Foreground="White"
-                                   BorderThickness="0"
-                                   Click="RemoveTagButton_Click"
-                                   Tag="{Binding}"
-                                   ToolTip="Remove tag"/>
-                        </Grid>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
         </StackPanel>
 
         <!-- Buttons -->

@@ -33,6 +33,7 @@ public class TestDatabaseHelper : IDisposable
 
             CREATE TABLE Tasks (
                 Id TEXT PRIMARY KEY,
+                Name TEXT NOT NULL DEFAULT '',
                 Description TEXT NOT NULL,
                 TaskTypeId INTEGER NOT NULL,
                 DeadlineDate TEXT,
@@ -40,6 +41,7 @@ public class TestDatabaseHelper : IDisposable
                 Importance REAL,
                 Complexity REAL,
                 UrgencyLevel INTEGER NOT NULL DEFAULT 0,
+                IsCompleted INTEGER NOT NULL DEFAULT 0,
                 CreatedAt TEXT NOT NULL,
                 UpdatedAt TEXT NOT NULL,
                 FOREIGN KEY (TaskTypeId) REFERENCES TaskTypes(Id)
