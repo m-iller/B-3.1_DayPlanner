@@ -62,6 +62,11 @@ public class CoordinateControllerViewModel : ViewModelBase
     public ICommand UpdateTaskPositionCommand { get; }
     public ICommand FilterByRangeCommand { get; }
 
+    public async Task LoadAsync()
+    {
+        await LoadTasksAsync();
+    }
+
     private async Task LoadTasksAsync()
     {
         var spec = new TaskQuerySpec();

@@ -34,4 +34,23 @@ public class TaskTypeManager : ITaskTypeManager
 
         await _repository.UpdateTaskTypeNameAsync(typeId, newName);
     }
+
+    public async Task<TaskType> CreateTaskTypeAsync(TaskType taskType)
+    {
+        if (taskType == null)
+        {
+            throw new ArgumentNullException(nameof(taskType));
+        }
+        if (string.IsNullOrWhiteSpace(taskType.Name))
+        {
+            throw new ArgumentException("Task type name cannot be empty", nameof(taskType));
+        }
+
+        return await _repository.InsertTaskTypeAsync(taskType);
+    }
+
+    public async Task DeleteTaskTypeAsync(int typeId)
+    {
+        await _repository.DeleteTaskTypeAsync(typeId);
+    }
 }

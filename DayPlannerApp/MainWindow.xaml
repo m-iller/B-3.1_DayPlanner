@@ -9,42 +9,30 @@
         mc:Ignorable="d"
         Title="Day Planner" Height="700" Width="1200">
     
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <TabControl>
+        <!-- Task List Tab -->
+        <TabItem Header="Task List">
+            <views:TaskListView DataContext="{Binding TaskListViewModel}"/>
+        </TabItem>
         
-        <!-- Navigation Menu -->
-        <Menu Grid.Row="0" Background="#F5F5F5">
-            <MenuItem Header="Views">
-                <MenuItem Header="Task List" Command="{Binding NavigateToTaskListCommand}"/>
-                <MenuItem Header="Day View" Command="{Binding NavigateToDayViewCommand}"/>
-                <MenuItem Header="Week View" Command="{Binding NavigateToWeekViewCommand}"/>
-                <MenuItem Header="Coordinate Controller" Command="{Binding NavigateToCoordinateControllerCommand}"/>
-            </MenuItem>
-            <MenuItem Header="Settings" Command="{Binding NavigateToSettingsCommand}"/>
-        </Menu>
+        <!-- Day View Tab -->
+        <TabItem Header="Day View">
+            <views:DayView DataContext="{Binding DayViewViewModel}"/>
+        </TabItem>
         
-        <!-- Content Area -->
-        <ContentControl Grid.Row="1" Content="{Binding CurrentView}">
-            <ContentControl.Resources>
-                <DataTemplate DataType="{x:Type vm:TaskListViewModel}">
-                    <views:TaskListView/>
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type vm:DayViewViewModel}">
-                    <views:DayView/>
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type vm:WeekViewViewModel}">
-                    <views:WeekView/>
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type vm:CoordinateControllerViewModel}">
-                    <views:CoordinateControllerView/>
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
-                    <views:SettingsView/>
-                </DataTemplate>
-            </ContentControl.Resources>
-        </ContentControl>
-    </Grid>
+        <!-- Week View Tab -->
+        <TabItem Header="Week View">
+            <views:WeekView DataContext="{Binding WeekViewViewModel}"/>
+        </TabItem>
+        
+        <!-- Coordinate Controller Tab -->
+        <TabItem Header="Coordinate Controller">
+            <views:CoordinateControllerView DataContext="{Binding CoordinateControllerViewModel}"/>
+        </TabItem>
+        
+        <!-- Settings Tab -->
+        <TabItem Header="Settings">
+            <views:SettingsView DataContext="{Binding SettingsViewModel}"/>
+        </TabItem>
+    </TabControl>
 </Window>

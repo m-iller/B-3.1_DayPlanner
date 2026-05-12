@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using DayPlannerApp.Models;
 using DayPlannerApp.Services;
+using DayPlannerApp.Views;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DayPlannerApp.ViewModels;
 
@@ -13,6 +16,8 @@ public class TaskListViewModel : ViewModelBase
 {
     private readonly ITaskManager _taskManager;
     private readonly ITagManager _tagManager;
+    private readonly ITaskTypeManager _taskTypeManager;
+    private readonly IServiceProvider _serviceProvider;
 
     private ObservableCollection<TaskEntity> _tasks = new();
     private TaskEntity? _selectedTask;
@@ -23,12 +28,21 @@ public class TaskListViewModel : ViewModelBase
     private bool _sortByUrgency;
     private bool _sortByDeadline;
 
-    public TaskListViewModel(ITaskManager taskManager, ITagManager tagManager)
+    public TaskListViewModel(
+        ITaskManager taskManager, 
+        ITagManager tagManager,
+        ITaskTypeManager taskTypeManager,
+        IServiceProvider serviceProvider)
     {
         _taskManager = taskManager;
         _tagManager = tagManager;
+        _taskTypeManager = taskTypeManager;
+        _serviceProvider = serviceProvider;
 
         LoadTasksCommand = new RelayCommand(async () => await LoadTasksAsync());
+        CreateTaskCommand = new RelayCommand(async () => await CreateTaskAsync());
+        EditTaskCommand = new RelayCommand(async () => await EditTaskAsync(), () => SelectedTask != null);
+        DeleteTaskCommand = new RelayCommand(async () => await DeleteTaskAsync(), () => SelectedTask != null);
         FilterByTagCommand = new RelayCommand<string>(async tag => await FilterByTagAsync(tag));
         FilterByTypeCommand = new RelayCommand<int?>(async typeId => await FilterByTypeAsync(typeId));
         FilterByDateRangeCommand = new RelayCommand(async () => await FilterByDateRangeAsync());
@@ -86,6 +100,9 @@ public class TaskListViewModel : ViewModelBase
     }
 
     public ICommand LoadTasksCommand { get; }
+    public ICommand CreateTaskCommand { get; }
+    public ICommand EditTaskCommand { get; }
+    public ICommand DeleteTaskCommand { get; }
     public ICommand FilterByTagCommand { get; }
     public ICommand FilterByTypeCommand { get; }
     public ICommand FilterByDateRangeCommand { get; }
@@ -93,7 +110,7 @@ public class TaskListViewModel : ViewModelBase
     public ICommand SortByDeadlineCommand { get; }
     public ICommand ClearFiltersCommand { get; }
 
-    private async Task LoadTasksAsync()
+    public async Task LoadTasksAsync()
     {
         var spec = new TaskQuerySpec();
         var tasks = await _taskManager.QueryTasksAsync(spec);
@@ -161,5 +178,64 @@ public class TaskListViewModel : ViewModelBase
         SortByUrgencyEnabled = false;
         SortByDeadlineEnabled = false;
         await LoadTasksAsync();
+    }
+
+    private async Task CreateTaskAsync()
+    {
+        try
+        {
+            var dialog = new CreateTaskDialog(
+                _taskManager,
+                _taskTypeManager,
+                _tagManager);
+            
+            if (dialog.ShowDialog() == true && dialog.CreatedTask != null)
+            {
+                await LoadTasksAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error creating task: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private async Task EditTaskAsync()
+    {
+        if (SelectedTask == null) return;
+
+        try
+        {
+            // TODO: Create EditTaskDialog similar to CreateTaskDialog
+            MessageBox.Show("Edit task functionality coming soon!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error editing task: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private async Task DeleteTaskAsync()
+    {
+        if (SelectedTask == null) return;
+
+        try
+        {
+            var result = MessageBox.Show(
+                $"Are you sure you want to delete this task?\n\n{SelectedTask.Description}",
+                "Confirm Delete",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                await _taskManager.DeleteTaskAsync(SelectedTask.Id);
+                await LoadTasksAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error deleting task: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 }

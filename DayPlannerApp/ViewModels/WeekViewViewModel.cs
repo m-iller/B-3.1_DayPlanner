@@ -49,6 +49,11 @@ public class WeekViewViewModel : ViewModelBase
     public ICommand NavigateToNextWeekCommand { get; }
     public ICommand NavigateToCurrentWeekCommand { get; }
 
+    public async Task LoadAsync()
+    {
+        await LoadWeekAsync();
+    }
+
     private async Task LoadWeekAsync()
     {
         var tasks = await _calendarViewManager.GetWeekViewAsync(WeekStartDate);

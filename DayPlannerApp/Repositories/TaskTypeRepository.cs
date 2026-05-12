@@ -83,4 +83,38 @@ public class TaskTypeRepository : ITaskTypeRepository
 
         await command.ExecuteNonQueryAsync();
     }
+
+    public async Task<TaskType> InsertTaskTypeAsync(TaskType taskType)
+    {
+        if (taskType == null)
+            throw new ArgumentNullException(nameof(taskType));
+        if (string.IsNullOrWhiteSpace(taskType.Name))
+            throw new ArgumentException("Task type name cannot be empty", nameof(taskType));
+
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            INSERT INTO TaskTypes (Id, Name, ColorHex)
+            VALUES (@Id, @Name, @ColorHex)";
+        command.Parameters.AddWithValue("@Id", taskType.Id);
+        command.Parameters.AddWithValue("@Name", taskType.Name);
+        command.Parameters.AddWithValue("@ColorHex", taskType.ColorHex);
+
+        await command.ExecuteNonQueryAsync();
+        return taskType;
+    }
+
+    public async Task DeleteTaskTypeAsync(int typeId)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = "DELETE FROM TaskTypes WHERE Id = @Id";
+        command.Parameters.AddWithValue("@Id", typeId);
+
+        await command.ExecuteNonQueryAsync();
+    }
 }

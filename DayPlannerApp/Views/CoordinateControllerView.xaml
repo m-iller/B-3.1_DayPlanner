@@ -7,6 +7,12 @@
              xmlns:converters="clr-namespace:DayPlannerApp.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1000">
+    <UserControl.Resources>
+        <converters:PercentageConverter x:Key="PercentageConverter"/>
+        <converters:CoordinateToCanvasConverter x:Key="CoordinateToCanvasConverter"/>
+        <converters:InvertedCoordinateToCanvasConverter x:Key="InvertedCoordinateToCanvasConverter"/>
+    </UserControl.Resources>
+    
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -199,10 +205,4 @@
             </Grid>
         </Border>
     </Grid>
-    
-    <UserControl.Resources>
-        <converters:PercentageConverter x:Key="PercentageConverter"/>
-        <converters:CoordinateToCanvasConverter x:Key="CoordinateToCanvasConverter"/>
-        <converters:InvertedCoordinateToCanvasConverter x:Key="InvertedCoordinateToCanvasConverter"/>
-    </UserControl.Resources>
 </UserControl>

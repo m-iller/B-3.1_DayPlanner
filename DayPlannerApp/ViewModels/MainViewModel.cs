@@ -1,20 +1,16 @@
-using System.Windows.Input;
+using System;
 using DayPlannerApp.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DayPlannerApp.ViewModels;
 
 public class MainViewModel : ViewModelBase
 {
-    private readonly ITaskManager _taskManager;
-    private readonly ITagManager _tagManager;
-    private readonly ITimeTracker _timeTracker;
-    private readonly ICalendarViewManager _calendarViewManager;
-    private readonly ICoordinateController _coordinateController;
-    private readonly ITaskTypeManager _taskTypeManager;
-    private readonly INotificationService _notificationService;
-    private readonly ILogger _logger;
-
-    private ViewModelBase? _currentView;
+    public TaskListViewModel TaskListViewModel { get; }
+    public DayViewViewModel DayViewViewModel { get; }
+    public WeekViewViewModel WeekViewViewModel { get; }
+    public CoordinateControllerViewModel CoordinateControllerViewModel { get; }
+    public SettingsViewModel SettingsViewModel { get; }
 
     public MainViewModel(
         ITaskManager taskManager,
@@ -24,60 +20,26 @@ public class MainViewModel : ViewModelBase
         ICoordinateController coordinateController,
         ITaskTypeManager taskTypeManager,
         INotificationService notificationService,
-        ILogger logger)
+        ILogger logger,
+        IServiceProvider serviceProvider)
     {
-        _taskManager = taskManager;
-        _tagManager = tagManager;
-        _timeTracker = timeTracker;
-        _calendarViewManager = calendarViewManager;
-        _coordinateController = coordinateController;
-        _taskTypeManager = taskTypeManager;
-        _notificationService = notificationService;
-        _logger = logger;
-
-        NavigateToTaskListCommand = new RelayCommand(NavigateToTaskList);
-        NavigateToDayViewCommand = new RelayCommand(NavigateToDayView);
-        NavigateToWeekViewCommand = new RelayCommand(NavigateToWeekView);
-        NavigateToCoordinateControllerCommand = new RelayCommand(NavigateToCoordinateController);
-        NavigateToSettingsCommand = new RelayCommand(NavigateToSettings);
+        // Create all ViewModels upfront
+        TaskListViewModel = new TaskListViewModel(taskManager, tagManager, taskTypeManager, serviceProvider);
+        DayViewViewModel = new DayViewViewModel(calendarViewManager);
+        WeekViewViewModel = new WeekViewViewModel(calendarViewManager);
+        CoordinateControllerViewModel = new CoordinateControllerViewModel(coordinateController, taskManager);
+        SettingsViewModel = new SettingsViewModel(taskTypeManager, notificationService, logger);
+        
+        // Load initial data
+        _ = InitializeAsync();
     }
 
-    public ViewModelBase? CurrentView
+    private async System.Threading.Tasks.Task InitializeAsync()
     {
-        get => _currentView;
-        set => SetProperty(ref _currentView, value);
-    }
-
-    public ICommand NavigateToTaskListCommand { get; }
-    public ICommand NavigateToDayViewCommand { get; }
-    public ICommand NavigateToWeekViewCommand { get; }
-    public ICommand NavigateToCoordinateControllerCommand { get; }
-    public ICommand NavigateToSettingsCommand { get; }
-
-    private void NavigateToTaskList()
-    {
-        CurrentView = new TaskListViewModel(_taskManager, _tagManager);
-    }
-
-    private void NavigateToDayView()
-    {
-        CurrentView = new DayViewViewModel(_calendarViewManager);
-    }
-
-    private void NavigateToWeekView()
-    {
-        CurrentView = new WeekViewViewModel(_calendarViewManager);
-    }
-
-    private void NavigateToCoordinateController()
-    {
-        CurrentView = new CoordinateControllerViewModel(_coordinateController, _taskManager);
-    }
-
-    private void NavigateToSettings()
-    {
-        var settingsVm = new SettingsViewModel(_taskTypeManager, _notificationService, _logger);
-        _ = settingsVm.LoadAsync();
-        CurrentView = settingsVm;
+        await TaskListViewModel.LoadTasksAsync();
+        await DayViewViewModel.LoadAsync();
+        await WeekViewViewModel.LoadAsync();
+        await CoordinateControllerViewModel.LoadAsync();
+        await SettingsViewModel.LoadAsync();
     }
 }

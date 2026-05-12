@@ -47,6 +47,11 @@ public class DayViewViewModel : ViewModelBase
     public ICommand NavigateToNextDayCommand { get; }
     public ICommand NavigateToTodayCommand { get; }
 
+    public async Task LoadAsync()
+    {
+        await LoadDayAsync();
+    }
+
     private async Task LoadDayAsync()
     {
         var tasks = await _calendarViewManager.GetDayViewAsync(SelectedDate);

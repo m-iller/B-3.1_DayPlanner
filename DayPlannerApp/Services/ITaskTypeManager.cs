@@ -8,5 +8,7 @@ public interface ITaskTypeManager
 {
     Task<TaskType?> GetTaskTypeAsync(int typeId);
     Task<IEnumerable<TaskType>> GetAllTaskTypesAsync();
+    Task<TaskType> CreateTaskTypeAsync(TaskType taskType);
     Task UpdateTaskTypeNameAsync(int typeId, string newName);
+    Task DeleteTaskTypeAsync(int typeId);
 }
