@@ -14,12 +14,19 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Description -->
+        <!-- Name -->
         <StackPanel Grid.Row="0" Margin="0,0,0,15">
+            <TextBlock Text="Task Name:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <TextBox x:Name="NameTextBox" Height="25"/>
+        </StackPanel>
+
+        <!-- Description -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,15">
             <TextBlock Text="Description:" FontWeight="SemiBold" Margin="0,0,0,5"/>
             <TextBox x:Name="DescriptionTextBox" 
                      Height="80" 
@@ -29,7 +36,7 @@
         </StackPanel>
 
         <!-- Task Type -->
-        <StackPanel Grid.Row="1" Margin="0,0,0,15">
+        <StackPanel Grid.Row="2" Margin="0,0,0,15">
             <TextBlock Text="Task Type:" FontWeight="SemiBold" Margin="0,0,0,5"/>
             <ComboBox x:Name="TaskTypeComboBox" 
                       DisplayMemberPath="Name"
@@ -37,13 +44,13 @@
         </StackPanel>
 
         <!-- Date -->
-        <StackPanel Grid.Row="2" Margin="0,0,0,15">
+        <StackPanel Grid.Row="3" Margin="0,0,0,15">
             <TextBlock Text="Deadline Date:" FontWeight="SemiBold" Margin="0,0,0,5"/>
             <DatePicker x:Name="DeadlineDatePicker"/>
         </StackPanel>
 
         <!-- Time -->
-        <StackPanel Grid.Row="3" Margin="0,0,0,15">
+        <StackPanel Grid.Row="4" Margin="0,0,0,15">
             <TextBlock Text="Deadline Time (optional):" FontWeight="SemiBold" Margin="0,0,0,5"/>
             <StackPanel Orientation="Horizontal">
                 <ComboBox x:Name="HourComboBox" Width="60" Margin="0,0,5,0"/>
@@ -53,7 +60,7 @@
         </StackPanel>
 
         <!-- Urgency -->
-        <StackPanel Grid.Row="4" Margin="0,0,0,15">
+        <StackPanel Grid.Row="5" Margin="0,0,0,15">
             <TextBlock Text="Urgency Level:" FontWeight="SemiBold" Margin="0,0,0,5"/>
             <Slider x:Name="UrgencySlider" 
                     Minimum="0" 
@@ -66,7 +73,7 @@
         </StackPanel>
 
         <!-- Coordinates -->
-        <StackPanel Grid.Row="5" Margin="0,0,0,15">
+        <StackPanel Grid.Row="6" Margin="0,0,0,15">
             <TextBlock Text="Importance / Complexity (optional):" FontWeight="SemiBold" Margin="0,0,0,5"/>
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Importance:" VerticalAlignment="Center" Margin="0,0,5,0"/>
@@ -77,7 +84,7 @@
         </StackPanel>
 
         <!-- Tags -->
-        <StackPanel Grid.Row="6" Margin="0,0,0,15">
+        <StackPanel Grid.Row="7" Margin="0,0,0,15">
             <TextBlock Text="Tags:" FontWeight="SemiBold" Margin="0,0,0,5"/>
             <ListBox x:Name="TagsListBox" 
                      Height="100"
@@ -85,7 +92,7 @@
         </StackPanel>
 
         <!-- Buttons -->
-        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="Create" 
                     Width="100" 
                     Height="35" 

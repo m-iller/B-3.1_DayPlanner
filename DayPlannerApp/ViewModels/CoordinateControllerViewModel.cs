@@ -26,6 +26,7 @@ public class CoordinateControllerViewModel : ViewModelBase
         LoadTasksCommand = new RelayCommand(async () => await LoadTasksAsync());
         UpdateTaskPositionCommand = new RelayCommand<TaskCoordinateViewModel>(async task => await UpdateTaskPositionAsync(task));
         FilterByRangeCommand = new RelayCommand(async () => await FilterByRangeAsync());
+        OpenTaskCommand = new RelayCommand<TaskCoordinateViewModel>(OpenTask);
     }
 
     public ObservableCollection<TaskCoordinateViewModel> Tasks
@@ -61,6 +62,7 @@ public class CoordinateControllerViewModel : ViewModelBase
     public ICommand LoadTasksCommand { get; }
     public ICommand UpdateTaskPositionCommand { get; }
     public ICommand FilterByRangeCommand { get; }
+    public ICommand OpenTaskCommand { get; }
 
     public async Task LoadAsync()
     {
@@ -80,6 +82,7 @@ public class CoordinateControllerViewModel : ViewModelBase
                 taskViewModels.Add(new TaskCoordinateViewModel
                 {
                     TaskId = task.Id,
+                    Name = task.Name,
                     Description = task.Description,
                     Importance = task.Importance.Value,
                     Complexity = task.Complexity.Value
@@ -111,6 +114,7 @@ public class CoordinateControllerViewModel : ViewModelBase
                 taskViewModels.Add(new TaskCoordinateViewModel
                 {
                     TaskId = task.Id,
+                    Name = task.Name,
                     Description = task.Description,
                     Importance = task.Importance.Value,
                     Complexity = task.Complexity.Value
@@ -120,11 +124,25 @@ public class CoordinateControllerViewModel : ViewModelBase
 
         Tasks = taskViewModels;
     }
+
+    private void OpenTask(TaskCoordinateViewModel? task)
+    {
+        if (task == null)
+            return;
+
+        // Show task details in message box
+        System.Windows.MessageBox.Show(
+            $"Task: {task.Name}\n\nDescription:\n{task.Description}\n\nImportance: {task.Importance:F0}\nComplexity: {task.Complexity:F0}",
+            "Task Details",
+            System.Windows.MessageBoxButton.OK,
+            System.Windows.MessageBoxImage.Information);
+    }
 }
 
 public class TaskCoordinateViewModel : ViewModelBase
 {
     private Guid _taskId;
+    private string _name = string.Empty;
     private string _description = string.Empty;
     private double _importance;
     private double _complexity;
@@ -133,6 +151,12 @@ public class TaskCoordinateViewModel : ViewModelBase
     {
         get => _taskId;
         set => SetProperty(ref _taskId, value);
+    }
+
+    public string Name
+    {
+        get => _name;
+        set => SetProperty(ref _name, value);
     }
 
     public string Description

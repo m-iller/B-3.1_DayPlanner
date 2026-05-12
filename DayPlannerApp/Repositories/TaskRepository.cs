@@ -31,12 +31,13 @@ public class TaskRepository : ITaskRepository
             {
                 command.Transaction = transaction;
                 command.CommandText = @"
-                    INSERT INTO Tasks (Id, Description, TaskTypeId, DeadlineDate, DeadlineTime, 
+                    INSERT INTO Tasks (Id, Name, Description, TaskTypeId, DeadlineDate, DeadlineTime, 
                                        Importance, Complexity, UrgencyLevel, CreatedAt, UpdatedAt)
-                    VALUES (@Id, @Description, @TaskTypeId, @DeadlineDate, @DeadlineTime, 
+                    VALUES (@Id, @Name, @Description, @TaskTypeId, @DeadlineDate, @DeadlineTime, 
                             @Importance, @Complexity, @UrgencyLevel, @CreatedAt, @UpdatedAt)";
 
                 command.Parameters.AddWithValue("@Id", task.Id.ToString());
+                command.Parameters.AddWithValue("@Name", task.Name);
                 command.Parameters.AddWithValue("@Description", task.Description);
                 command.Parameters.AddWithValue("@TaskTypeId", task.TaskTypeId);
                 command.Parameters.AddWithValue("@DeadlineDate", task.DeadlineDate?.ToString("yyyy-MM-dd") ?? (object)DBNull.Value);
@@ -202,7 +203,7 @@ public class TaskRepository : ITaskRepository
         using (var command = connection.CreateCommand())
         {
             command.CommandText = @"
-                SELECT Id, Description, TaskTypeId, DeadlineDate, DeadlineTime, 
+                SELECT Id, Name, Description, TaskTypeId, DeadlineDate, DeadlineTime, 
                        Importance, Complexity, UrgencyLevel, CreatedAt, UpdatedAt
                 FROM Tasks
                 WHERE Id = @Id";
@@ -303,7 +304,7 @@ public class TaskRepository : ITaskRepository
         var whereClause = whereClauses.Any() ? "WHERE " + string.Join(" AND ", whereClauses) : "";
 
         var sql = $@"
-            SELECT Id, Description, TaskTypeId, DeadlineDate, DeadlineTime, 
+            SELECT Id, Name, Description, TaskTypeId, DeadlineDate, DeadlineTime, 
                    Importance, Complexity, UrgencyLevel, CreatedAt, UpdatedAt
             FROM Tasks
             {whereClause}";
@@ -356,15 +357,16 @@ public class TaskRepository : ITaskRepository
         return new TaskEntity
         {
             Id = Guid.Parse(reader.GetString(0)),
-            Description = reader.GetString(1),
-            TaskTypeId = reader.GetInt32(2),
-            DeadlineDate = reader.IsDBNull(3) ? null : DateTime.Parse(reader.GetString(3)),
-            DeadlineTime = reader.IsDBNull(4) ? null : TimeSpan.Parse(reader.GetString(4)),
-            Importance = reader.IsDBNull(5) ? null : reader.GetDouble(5),
-            Complexity = reader.IsDBNull(6) ? null : reader.GetDouble(6),
-            UrgencyLevel = reader.GetInt32(7),
-            CreatedAt = DateTime.Parse(reader.GetString(8)),
-            UpdatedAt = DateTime.Parse(reader.GetString(9))
+            Name = reader.GetString(1),
+            Description = reader.GetString(2),
+            TaskTypeId = reader.GetInt32(3),
+            DeadlineDate = reader.IsDBNull(4) ? null : DateTime.Parse(reader.GetString(4)),
+            DeadlineTime = reader.IsDBNull(5) ? null : TimeSpan.Parse(reader.GetString(5)),
+            Importance = reader.IsDBNull(6) ? null : reader.GetDouble(6),
+            Complexity = reader.IsDBNull(7) ? null : reader.GetDouble(7),
+            UrgencyLevel = reader.GetInt32(8),
+            CreatedAt = DateTime.Parse(reader.GetString(9)),
+            UpdatedAt = DateTime.Parse(reader.GetString(10))
         };
     }
 }

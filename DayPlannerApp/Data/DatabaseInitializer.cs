@@ -90,6 +90,7 @@ public class DatabaseInitializer
 
             CREATE TABLE IF NOT EXISTS Tasks (
                 Id TEXT PRIMARY KEY,
+                Name TEXT NOT NULL DEFAULT '',
                 Description TEXT NOT NULL,
                 TaskTypeId INTEGER NOT NULL,
                 DeadlineDate TEXT,

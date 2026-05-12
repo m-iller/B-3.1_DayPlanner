@@ -65,10 +65,10 @@ public partial class CreateTaskDialog : Window
     {
         try
         {
-            // Validate description
-            if (string.IsNullOrWhiteSpace(DescriptionTextBox.Text))
+            // Validate name
+            if (string.IsNullOrWhiteSpace(NameTextBox.Text))
             {
-                MessageBox.Show("Description is required.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Task name is required.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -83,6 +83,7 @@ public partial class CreateTaskDialog : Window
             var task = new TaskEntity
             {
                 Id = Guid.NewGuid(),
+                Name = NameTextBox.Text.Trim(),
                 Description = DescriptionTextBox.Text.Trim(),
                 TaskTypeId = (int)TaskTypeComboBox.SelectedValue,
                 UrgencyLevel = (int)UrgencySlider.Value,

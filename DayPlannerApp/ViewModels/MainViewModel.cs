@@ -28,7 +28,7 @@ public class MainViewModel : ViewModelBase
         DayViewViewModel = new DayViewViewModel(calendarViewManager);
         WeekViewViewModel = new WeekViewViewModel(calendarViewManager);
         CoordinateControllerViewModel = new CoordinateControllerViewModel(coordinateController, taskManager);
-        SettingsViewModel = new SettingsViewModel(taskTypeManager, notificationService, logger);
+        SettingsViewModel = new SettingsViewModel(taskTypeManager, tagManager, notificationService, logger);
         
         // Load initial data
         _ = InitializeAsync();

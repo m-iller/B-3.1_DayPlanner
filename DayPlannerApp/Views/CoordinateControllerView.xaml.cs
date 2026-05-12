@@ -2,6 +2,8 @@ using System;
 using System.Globalization;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
+using DayPlannerApp.ViewModels;
 
 namespace DayPlannerApp.Views;
 
@@ -10,6 +12,15 @@ public partial class CoordinateControllerView : UserControl
     public CoordinateControllerView()
     {
         InitializeComponent();
+    }
+
+    private void TaskBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is System.Windows.FrameworkElement element && element.Tag is TaskCoordinateViewModel task)
+        {
+            var viewModel = DataContext as CoordinateControllerViewModel;
+            viewModel?.OpenTaskCommand.Execute(task);
+        }
     }
 }
 
