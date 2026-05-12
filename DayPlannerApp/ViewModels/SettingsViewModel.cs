@@ -259,6 +259,7 @@ public class SettingsViewModel : ViewModelBase
 public class TaskTypeViewModel : ViewModelBase
 {
     private string _name;
+    private string _displayText;
     private bool _isModified;
     private bool _isNew;
 
@@ -272,6 +273,20 @@ public class TaskTypeViewModel : ViewModelBase
             if (_name != value)
             {
                 _name = value;
+                IsModified = true;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string DisplayText
+    {
+        get => _displayText;
+        set
+        {
+            if (_displayText != value)
+            {
+                _displayText = value;
                 IsModified = true;
                 OnPropertyChanged();
             }
@@ -302,6 +317,7 @@ public class TaskTypeViewModel : ViewModelBase
     {
         Id = taskType.Id;
         _name = taskType.Name;
+        _displayText = taskType.Name; // Default to Name if no DisplayText
         _isModified = false;
         _isNew = false;
     }

@@ -206,8 +206,16 @@ public class TaskListViewModel : ViewModelBase
 
         try
         {
-            // TODO: Create EditTaskDialog similar to CreateTaskDialog
-            MessageBox.Show("Edit task functionality coming soon!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            var dialog = new EditTaskDialog(
+                SelectedTask,
+                _taskManager,
+                _taskTypeManager,
+                _tagManager);
+            
+            if (dialog.ShowDialog() == true && dialog.UpdatedTask != null)
+            {
+                await LoadTasksAsync();
+            }
         }
         catch (Exception ex)
         {

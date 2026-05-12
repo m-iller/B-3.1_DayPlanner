@@ -27,6 +27,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             
             <Button Grid.Column="0" 
@@ -59,6 +60,13 @@
                    Margin="10,0"/>
             
             <Button Grid.Column="3" 
+                   Content="🔄 Refresh" 
+                   Command="{Binding LoadWeekCommand}" 
+                   Width="100" 
+                   Height="35"
+                   Margin="10,0"/>
+            
+            <Button Grid.Column="4" 
                    Content="Next Week ▶" 
                    Command="{Binding NavigateToNextWeekCommand}" 
                    Width="130" 

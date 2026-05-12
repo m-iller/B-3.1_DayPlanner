@@ -9,6 +9,7 @@ public class TaskEntity
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int TaskTypeId { get; set; }
+    public string TaskTypeName { get; set; } = string.Empty;
     public DateTime? DeadlineDate { get; set; }
     public TimeSpan? DeadlineTime { get; set; }
     public double? Importance { get; set; }

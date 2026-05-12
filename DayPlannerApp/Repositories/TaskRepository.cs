@@ -108,7 +108,8 @@ public class TaskRepository : ITaskRepository
                 command.Transaction = transaction;
                 command.CommandText = @"
                     UPDATE Tasks 
-                    SET Description = @Description,
+                    SET Name = @Name,
+                        Description = @Description,
                         TaskTypeId = @TaskTypeId,
                         DeadlineDate = @DeadlineDate,
                         DeadlineTime = @DeadlineTime,
@@ -119,6 +120,7 @@ public class TaskRepository : ITaskRepository
                     WHERE Id = @Id";
 
                 command.Parameters.AddWithValue("@Id", task.Id.ToString());
+                command.Parameters.AddWithValue("@Name", task.Name);
                 command.Parameters.AddWithValue("@Description", task.Description);
                 command.Parameters.AddWithValue("@TaskTypeId", task.TaskTypeId);
                 command.Parameters.AddWithValue("@DeadlineDate", task.DeadlineDate?.ToString("yyyy-MM-dd") ?? (object)DBNull.Value);
@@ -203,10 +205,12 @@ public class TaskRepository : ITaskRepository
         using (var command = connection.CreateCommand())
         {
             command.CommandText = @"
-                SELECT Id, Name, Description, TaskTypeId, DeadlineDate, DeadlineTime, 
-                       Importance, Complexity, UrgencyLevel, CreatedAt, UpdatedAt
-                FROM Tasks
-                WHERE Id = @Id";
+                SELECT t.Id, t.Name, t.Description, t.TaskTypeId, t.DeadlineDate, t.DeadlineTime, 
+                       t.Importance, t.Complexity, t.UrgencyLevel, t.CreatedAt, t.UpdatedAt,
+                       tt.Name as TaskTypeName
+                FROM Tasks t
+                LEFT JOIN TaskTypes tt ON t.TaskTypeId = tt.Id
+                WHERE t.Id = @Id";
             command.Parameters.AddWithValue("@Id", taskId.ToString());
 
             using var reader = await command.ExecuteReaderAsync();
@@ -304,9 +308,11 @@ public class TaskRepository : ITaskRepository
         var whereClause = whereClauses.Any() ? "WHERE " + string.Join(" AND ", whereClauses) : "";
 
         var sql = $@"
-            SELECT Id, Name, Description, TaskTypeId, DeadlineDate, DeadlineTime, 
-                   Importance, Complexity, UrgencyLevel, CreatedAt, UpdatedAt
-            FROM Tasks
+            SELECT t.Id, t.Name, t.Description, t.TaskTypeId, t.DeadlineDate, t.DeadlineTime, 
+                   t.Importance, t.Complexity, t.UrgencyLevel, t.CreatedAt, t.UpdatedAt,
+                   tt.Name as TaskTypeName
+            FROM Tasks t
+            LEFT JOIN TaskTypes tt ON t.TaskTypeId = tt.Id
             {whereClause}";
 
         var tasks = new List<TaskEntity>();
@@ -366,7 +372,8 @@ public class TaskRepository : ITaskRepository
             Complexity = reader.IsDBNull(7) ? null : reader.GetDouble(7),
             UrgencyLevel = reader.GetInt32(8),
             CreatedAt = DateTime.Parse(reader.GetString(9)),
-            UpdatedAt = DateTime.Parse(reader.GetString(10))
+            UpdatedAt = DateTime.Parse(reader.GetString(10)),
+            TaskTypeName = reader.IsDBNull(11) ? string.Empty : reader.GetString(11)
         };
     }
 }
